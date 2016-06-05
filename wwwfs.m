@@ -1,132 +1,32 @@
 clear;close;clc;
-numBytes = 10;
+% numBytes = input('numBytes = ');
+% N = input('N (N must be 1, 2, 4 or 8) = \n');
+% numBytes = 10;
 N = 8;
-t = 2;
+% t = 2;
+t = input('t = ');
 numNodes = 2^t+N;
+%read an image as original data
+imdata = imread('test2.jpg');	
+figure,imshow(imdata);
+imsize=size(imdata);
+BYTES=reshape(imdata,imsize(1)*imsize(2)*imsize(3),1);
+data_size=size(BYTES);
+numBytes = data_size(1)/N;
+%BinSer=dec2bin(BYTES,8);	
+%BinSer=BinSer';
+FileName=['test','.txt'];
+fid=fopen(FileName,'w');
+fprintf(fid,'%d',BYTES(:));
+fclose(fid);
 
 % Generate random data
-DATA = randbytes(N*numBytes,1);
-
-% Convert the byte array into an array of symbols over the field gf(2^N)
-DATA = gfNarray(DATA,N);
-
-% Reshape data into blocks
-DATA = reshape(DATA,N,length(DATA)/N);
-
-% Allocate the storage matrix. Every row corresponds to a storage node.
-STORAGE = zeros(numNodes,size(DATA,2));
-STORAGE = gf(STORAGE,N);
-
-% Celculate the RS generator matrix
-G = RSgenerator(N,t);
-
-% Iterate over the data one block at a time
-numBlocks = size(DATA,2);
-for blockIndex = 1:numBlocks
-    block = DATA(:,blockIndex)';
-    STORAGE(:,blockIndex) =  block*G;
-end
-
-% Decode data using a subset of the nodes.
-% The data can be decoded using any N nodes.
-nodeMask = 1:N; % Select what N nodes to use when decoding
-
-% Allocate space for the decoded data
-decDATA = zeros(size(DATA));
-decDATA = gf(decDATA,N);
-
-% Iterate over the encoded blocks and solve a system of linear equations
-% for every block.
-for blockIndex = 1:numBlocks
-    block = STORAGE(nodeMask,blockIndex)';
-    decDATA(:,blockIndex) = block/G(:,nodeMask);
-end
-
-% Compare decoded data with the original data
-DATA - decDATA
-
-
-%% Code moved to RSgenerator.m Remove soon.
-clear;close;clc;
-N = 4;
-t = 2;
-
-symbols = gf(0:2^N-1,N);
-if N < 2
-   error('N must be m>=2') 
-end
-if t < 1 || t >= 2^(N-1)
-   error('t must be 0<t<2^(M-1)')
-end
-
-numCoefs = 2*t+1;
-coefs = gf(zeros(numCoefs,1),N);
-
-% Initialize coefficient vector
-coefs(1) = gf(1,N);
-coefs(2) = gf(2^N-1,N);
-
-% For storing the intermediate result
-tmp = zeros(size(coefs));
-
-% Calculate the coefficients iteratively
-for i = 1:(2*t-1)
-    tmp = circshift(coefs,1);
-    for j = 1:(length(tmp)-1)
-        tmp(j) = tmp(j) + coefs(j)*gf(j,N);
-    end
-    coefs = tmp;
-end
-
-% Form the generator matrix by shifting the coefficients
-G = zeros(N,numCoefs+N-1);
-G = gf(G,N);
-for i = 1:N
-   G(i,i:numCoefs+i-1) = coefs; 
-end
-
-DATA = 1:N;
-DATA = gf(DATA,N)
-CODE = DATA * G;
-invG = inv(G(:,1:N));
-
-CODE(1:N)*invG
-
-
-%% TESTS
-clc;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear;close;
-disp('Testing byteNarray(gfNarray(A,N),N) == A...')
-numBytes = 10;
-N = 1;
-G = randbytes(numBytes,1);
-dataB = randbytes(numBytes,1);
-
-gfA = gfNarray(G,N);
-gfB = gfNarray(dataB,N);
-gfC = gfA + gfB;
-
-if sum(abs(G - byteNarray(gfC - gfB,N))) ~= 0
-   error('Failure')
-end
-disp('Success!')
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear;close;
-disp('Testing encoding/decoding using RS codes...')
-numBytes = 10;
-N = 8;
-t = 2;
-numNodes = 2^t+N;
-
-% Generate random data
-BYTES = randbytes(N*numBytes,1);
-
+% BYTES = randbytes(N*numBytes,1);
+% fid = fopen('random data.txt','w');
+% fprintf(fid,'%g\t',BYTES);
+% fclose(fid);
 % Convert the byte array into an array of symbols over the field gf(2^N)
 DATA = gfNarray(BYTES,N);
-
 % Reshape data into blocks
 DATA = reshape(DATA,N,length(DATA)/N);
 
@@ -134,7 +34,7 @@ DATA = reshape(DATA,N,length(DATA)/N);
 STORAGE = zeros(numNodes,size(DATA,2));
 STORAGE = gf(STORAGE,N);
 
-% Celculate the RS generator matrix
+% Calculate the RS generator matrix
 G = RSgenerator(N,t);
 
 % Iterate over the data one block at a time
@@ -143,10 +43,33 @@ for blockIndex = 1:numBlocks
     block = DATA(:,blockIndex)';
     STORAGE(:,blockIndex) =  block*G;
 end
+x=uint8(STORAGE.x);
+% for i=1:numNodes
+%     FileName=['block',num2str(i),'.txt'];
+%     fid=fopen(FileName,'w');
+%     fprintf(fid,'%d',x(i,:));
+%     fclose(fid); 
+% end
 
 % Decode data using a subset of the nodes.
 % The data can be decoded using any N nodes.
-nodeMask = 1:N; % Select what N nodes to use when decoding
+% nodeMask = input('choose 8 nodes for decoding (use [] input style) = \n'); % Select what N nodes to use when decoding
+nodeMask = 1:numNodes;   % first choose all of the node as mask
+noteMask_bit = toBitmask(nodeMask);
+noteMask_bit(3) = 0;    %set the third node can not use
+num = 0;
+% choose the first 8 nodes which still can use as the node mask
+for i = 1:numNodes
+        nodeMask_choose(i)=noteMask_bit(i);
+    if noteMask_bit(i)==1
+        num = num+1;
+    end
+    if num == 8
+        break
+    end
+end
+%recover the chosen bit mask back to vector mask
+nodeMask_recover = toIndexVector(nodeMask_choose);
 
 % Allocate space for the decoded data
 decDATA = zeros(size(DATA));
@@ -155,15 +78,19 @@ decDATA = gf(decDATA,N);
 % Iterate over the encoded blocks and solve a system of linear equations
 % for every block.
 for blockIndex = 1:numBlocks
-    block = STORAGE(nodeMask,blockIndex)';
-    decDATA(:,blockIndex) = block/G(:,nodeMask);
+    block = STORAGE(nodeMask_recover,blockIndex)';
+    decDATA(:,blockIndex) = block/G(:,nodeMask_recover);
 end
 
 % Compare decoded data with the original data
+
 decDATA = reshape(decDATA,1,N*numBlocks);
 decBYTES = byteNarray(decDATA,N);
+data_recover=reshape(decBYTES,imsize(1),imsize(2),imsize(3));
+figure,imshow(data_recover);             % show recover file
 if sum(abs(BYTES - decBYTES)) ~= 0
-   error('Failure')
+   disp('Failure')
+else
+    disp('Success!')
 end
-disp('Success!')
 
