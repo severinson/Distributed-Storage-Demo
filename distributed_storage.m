@@ -83,9 +83,20 @@ global N
 global BYTES
 global numBytes
 N=8;
+%choose the original image file
 axes(handles.input_window);
 imdata = imread('test2.jpg');	
 imshow(imdata),colormap(gray);%show the original image file
+% [filename,pathname]=uigetfile({'*.*';'*.pgm';'*.jpg';'*.tif'},...
+%     'Please choose a file');
+% if filename==0
+%     msgbox('Please choose a file')
+% else
+%     filepath=[pathname,filename];
+%     imdata=imread(filepath);
+%     imshow(imdata);
+%    
+% end
 global imsize
 imsize=size(imdata);
 BYTES=reshape(imdata,imsize(1)*imsize(2)*imsize(3),1);
@@ -167,7 +178,7 @@ data_recover=reshape(decBYTES,imsize(1),imsize(2),imsize(3));
 axes(handles.output_window);
 imshow(data_recover),colormap(gray);%show the original image file
 % remind when the recover process finished
-h=msgbox('Recover Finished£¡','remind');
+h=msgbox('Recover Finishedï¼','remind');
 pause(1)
 close(h)
 
@@ -245,11 +256,50 @@ function calculate_node_number_Callback(hObject, eventdata, handles)
 % hObject    handle to calculate_node_number (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+
+function nodes_Callback(hObject, eventdata, handles)
+% hObject    handle to nodes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of nodes as text
+%        str2double(get(hObject,'String')) returns contents of nodes as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function nodes_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to nodes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on button press in input_t.
+function input_t_Callback(hObject, eventdata, handles)
+% hObject    handle to input_t (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% global t
+input_t=str2double(get(handles.t,'String'));
+if input_t>0 && input_t<6
+    t = input_t;
+    handles.input_t=input_t;
+    guidata(hObject,handles)
+    h=msgbox({'Parameter t Set Successedï¼'; 'Calculating Nodes Amount'},'remind');
+
+
 global X_use
 X_use = [1 1 0]; 
 % set(handles.C1, 'BackgroundColor',X_use);
 N = 8;
-global t
 global numNodes
 numNodes = 2^t+N;
 s = 'handles.C';
@@ -263,6 +313,7 @@ s = 'handles.C';
  end
 re=num2str(numNodes);
 set(handles.nodes,'string',re) 
+
 % Convert the byte array into an array of symbols over the field gf(2^N)
 global BYTES
 global DATA
@@ -299,43 +350,7 @@ x=uint8(STORAGE.x);
 global noteMask_bit
 nodeMask = 1:numNodes;
 noteMask_bit = toBitmask(nodeMask);
-
-
-function nodes_Callback(hObject, eventdata, handles)
-% hObject    handle to nodes (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of nodes as text
-%        str2double(get(hObject,'String')) returns contents of nodes as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function nodes_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to nodes (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in input_t.
-function input_t_Callback(hObject, eventdata, handles)
-% hObject    handle to input_t (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-global t
-input_t=str2double(get(handles.t,'String'));
-if input_t>0 && input_t<6
-    t = input_t;
-    handles.input_t=input_t;
-    guidata(hObject,handles)
-    h=msgbox('Parameter t set successed£¡','remind');
-    pause(1)
+%     pause(1)
     close(h)
 else
     if input_t < 1
