@@ -178,7 +178,7 @@ data_recover=reshape(decBYTES,imsize(1),imsize(2),imsize(3));
 axes(handles.output_window);
 imshow(data_recover),colormap(gray);%show the original image file
 % remind when the recover process finished
-h=msgbox('Recover Finished！','remind');
+h=msgbox('Recover Finished','remind');
 pause(1)
 close(h)
 
@@ -293,7 +293,7 @@ if input_t>0 && input_t<6
     t = input_t;
     handles.input_t=input_t;
     guidata(hObject,handles)
-    h=msgbox({'Parameter t Set Successed！'; 'Calculating Nodes Amount'},'remind');
+    h=msgbox({'Parameter t Set Successed!'; 'Calculating Nodes Amount'},'remind');
 
 
 global X_use
