@@ -85,29 +85,31 @@ global numBytes
 N=8;
 %choose the original image file
 axes(handles.input_window);
-imdata = imread('test2.jpg');	
-imshow(imdata),colormap(gray);%show the original image file
-% [filename,pathname]=uigetfile({'*.*';'*.pgm';'*.jpg';'*.tif'},...
-%     'Please choose a file');
-% if filename==0
-%     msgbox('Please choose a file')
-% else
-%     filepath=[pathname,filename];
-%     imdata=imread(filepath);
-%     imshow(imdata);
-%    
-% end
-global imsize
-imsize=size(imdata);
-BYTES=reshape(imdata,imsize(1)*imsize(2)*imsize(3),1);
-data_size=size(BYTES);
-numBytes = data_size(1)/N;
-%BinSer=dec2bin(BYTES,8);	
-%BinSer=BinSer';
-FileName=['test','.txt'];
-fid=fopen(FileName,'w');
-fprintf(fid,'%d',BYTES(:));
-fclose(fid);
+% imdata = imread('test2.jpg');	
+% imshow(imdata),colormap(gray);%show the original image file
+[filename,pathname]=uigetfile({'*.*';'*.pgm';'*.jpg';'*.tif'},...
+    'Please choose a file');
+B='im';
+K = finfo(filename);
+if strcmp(K,B)
+    filepath=[pathname,filename];
+    imdata=imread(filepath);
+    imdata=imresize(imdata,[80 80])
+    imshow(imdata);
+    global imsize
+    imsize=size(imdata);
+    BYTES=reshape(imdata,imsize(1)*imsize(2)*imsize(3),1);
+    data_size=size(BYTES);
+    numBytes = data_size(1)/N;
+    %BinSer=dec2bin(BYTES,8);	
+    %BinSer=BinSer';
+    FileName=['test','.txt'];
+    fid=fopen(FileName,'w');
+    fprintf(fid,'%d',BYTES(:));
+    fclose(fid);
+else
+    msgbox('Please choose an image')   
+end
 
 
 % --- Executes on button press in compare.
