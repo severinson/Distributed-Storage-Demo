@@ -22,7 +22,7 @@ function varargout = distributed_storage(varargin)
 
 % Edit the above text to modify the response to help distributed_storage
 
-% Last Modified by GUIDE v2.5 05-Jun-2016 13:04:12
+% Last Modified by GUIDE v2.5 23-Jun-2016 17:25:55
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -85,8 +85,6 @@ global numBytes
 N=8;
 %choose the original image file
 axes(handles.input_window);
-% imdata = imread('test2.jpg');	
-% imshow(imdata),colormap(gray);%show the original image file
 [filename,pathname]=uigetfile({'*.*';'*.pgm';'*.jpg';'*.tif'},...
     'Please choose a file');
 B='im';
@@ -94,15 +92,13 @@ K = finfo(filename);
 if strcmp(K,B)
     filepath=[pathname,filename];
     imdata=imread(filepath);
-    imdata=imresize(imdata,[80 80])
+    imdata=imresize(imdata,[80 80]);
     imshow(imdata);
     global imsize
     imsize=size(imdata);
     BYTES=reshape(imdata,imsize(1)*imsize(2)*imsize(3),1);
     data_size=size(BYTES);
     numBytes = data_size(1)/N;
-    %BinSer=dec2bin(BYTES,8);	
-    %BinSer=BinSer';
     FileName=['test','.txt'];
     fid=fopen(FileName,'w');
     fprintf(fid,'%d',BYTES(:));
@@ -110,7 +106,6 @@ if strcmp(K,B)
 else
     msgbox('Please choose an image')   
 end
-
 
 % --- Executes on button press in compare.
 function compare_Callback(hObject, eventdata, handles)
@@ -140,6 +135,7 @@ function recover_result_Callback(hObject, eventdata, handles)
 global noteMask_bit
 global numNodes
 N = 8;
+h=msgbox('Processing...','remind');
 % noteMask_bit
 num = 0;
 % choose the first 8 nodes which still can use as the node mask
@@ -177,6 +173,7 @@ global decBYTES
 decBYTES = byteNarray(decDATA,N);
 global imsize
 data_recover=reshape(decBYTES,imsize(1),imsize(2),imsize(3));
+close(h)
 axes(handles.output_window);
 imshow(data_recover),colormap(gray);%show the original image file
 % remind when the recover process finished
@@ -303,7 +300,7 @@ X_use = [1 1 0];
 % set(handles.C1, 'BackgroundColor',X_use);
 N = 8;
 global numNodes
-numNodes = 2^t+N;
+numNodes = 2*t+1+N;
 s = 'handles.C';
  for i = 1:numNodes
    ss = strcat(s,num2str(i));
@@ -340,14 +337,6 @@ for blockIndex = 1:numBlocks
     STORAGE(:,blockIndex) =  block*G;
 end
 x=uint8(STORAGE.x);
-% for i=1:numNodes
-%     FileName=['block',num2str(i),'.txt'];
-%     fid=fopen(FileName,'w');
-%     fprintf(fid,'%d',x(i,:));
-%     fclose(fid); 
-% end
-% Decode data using a subset of the nodes.
-% The data can be decoded using any N nodes.
 
 global noteMask_bit
 nodeMask = 1:numNodes;
@@ -874,3 +863,10 @@ set(hObject, 'BackgroundColor',[1 0 0]);
 global noteMask_bit
 noteMask_bit(44)=0;
 % noteMask_b
+
+
+% --- Executes on button press in pushbutton54.
+function pushbutton54_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton54 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

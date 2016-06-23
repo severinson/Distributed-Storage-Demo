@@ -10,7 +10,7 @@ if t < 1 || t >= 2^(N-1)
    error('t must be 0<t<2^(M-1)')
 end
 
-numCoefs = 2^t+1;
+numCoefs = 2*t+2;
 coefs = gf(zeros(numCoefs,1),N);
 
 % Initialize coefficient vector
